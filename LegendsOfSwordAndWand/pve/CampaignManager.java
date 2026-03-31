@@ -13,8 +13,8 @@ public class CampaignManager {
         // Simple demo: 1 battle with 2 enemies
         List<Hero> heroes = party.getHeroes();
         List<Enemy> enemies = new ArrayList<>();
-        enemies.add(new Enemy("Goblin", 1, 20, 5, 2));
-        enemies.add(new Enemy("Orc", 2, 30, 6, 3));
+        enemies.add(new Enemy("Goblin", 1, 40, 7, 2));
+        enemies.add(new Enemy("Orc", 2, 90, 15, 3));
 
         BattleEngine battle = new BattleEngine();
         battle.startBattle(heroes, enemies);
