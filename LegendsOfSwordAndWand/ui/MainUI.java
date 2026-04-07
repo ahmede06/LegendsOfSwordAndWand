@@ -8,7 +8,6 @@ import java.util.List;
 import javax.swing.*;
 import model.Enemy;
 import model.Hero;
-import model.Party;
 
 public class MainUI {
 
@@ -24,7 +23,7 @@ public class MainUI {
     private void initUI() {
         frame = new JFrame("PvE Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
+        frame.setSize(500, 400);
         frame.setLocationRelativeTo(null);
         showMainMenu();
         frame.setVisible(true);
@@ -32,8 +31,7 @@ public class MainUI {
 
     private void showMainMenu() {
         frame.getContentPane().removeAll();
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(4,1,10,10));
+        JPanel panel = new JPanel(new GridLayout(4,1,10,10));
 
         JLabel title = new JLabel("Welcome to the PvE Game!", SwingConstants.CENTER);
         panel.add(title);
@@ -58,30 +56,40 @@ public class MainUI {
     private void showRegisterDialog() {
         JTextField usernameField = new JTextField();
         JTextField passwordField = new JPasswordField();
+
         Object[] message = {
-                "Username:", usernameField,
-                "Password:", passwordField
+            "Username:", usernameField,
+            "Password:", passwordField
         };
+
         int option = JOptionPane.showConfirmDialog(frame, message, "Register", JOptionPane.OK_CANCEL_OPTION);
+
         if(option == JOptionPane.OK_OPTION) {
             String u = usernameField.getText();
             String p = passwordField.getText();
-            if(auth.register(u,p)) JOptionPane.showMessageDialog(frame, "Registered!");
-            else JOptionPane.showMessageDialog(frame, "Username taken.");
+
+            if(auth.register(u,p))
+                JOptionPane.showMessageDialog(frame, "Registered!");
+            else
+                JOptionPane.showMessageDialog(frame, "Username taken.");
         }
     }
 
     private void showLoginDialog() {
         JTextField usernameField = new JTextField();
         JTextField passwordField = new JPasswordField();
+
         Object[] message = {
-                "Username:", usernameField,
-                "Password:", passwordField
+            "Username:", usernameField,
+            "Password:", passwordField
         };
+
         int option = JOptionPane.showConfirmDialog(frame, message, "Login", JOptionPane.OK_CANCEL_OPTION);
+
         if(option == JOptionPane.OK_OPTION) {
             String u = usernameField.getText();
             String p = passwordField.getText();
+
             if(auth.login(u,p)) {
                 currentUser = auth.getCurrentUser();
                 JOptionPane.showMessageDialog(frame, "Logged in as " + u);
@@ -94,16 +102,18 @@ public class MainUI {
 
     private void showUserMenu() {
         frame.getContentPane().removeAll();
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3,1,10,10));
+
+        JPanel panel = new JPanel(new GridLayout(4,1,10,10));
 
         JLabel title = new JLabel("User Menu", SwingConstants.CENTER);
         panel.add(title);
 
         JButton startPvEBtn = new JButton("Start PvE");
+        JButton startPvPBtn = new JButton("Start PvP");
         JButton logoutBtn = new JButton("Logout");
 
         panel.add(startPvEBtn);
+        panel.add(startPvPBtn);
         panel.add(logoutBtn);
 
         frame.getContentPane().add(panel);
@@ -111,6 +121,8 @@ public class MainUI {
         frame.repaint();
 
         startPvEBtn.addActionListener(e -> startPvE());
+        startPvPBtn.addActionListener(e -> startPvP());
+
         logoutBtn.addActionListener(e -> {
             currentUser = null;
             showMainMenu();
@@ -118,31 +130,41 @@ public class MainUI {
     }
 
     private void startPvE() {
-    if(currentUser.getParties().isEmpty()) {
-        Party p = new Party("DefaultParty");
-        p.addHero(HeroFactory.createHero("warrior"));
-        p.addHero(HeroFactory.createHero("mage"));
-        p.addHero(HeroFactory.createHero("adventurer"));
-        currentUser.addParty(p);
+
+        List<Hero> heroes = List.of(
+            HeroFactory.createHero("warrior"),
+            HeroFactory.createHero("mage"),
+            HeroFactory.createHero("adventurer")
+        );
+
+        List<Enemy> enemies = List.of(
+            new Enemy("Goblin", 1, 50, 15, 3),
+            new Enemy("Orc", 1, 80, 20, 5)
+        );
+
+        frame.getContentPane().removeAll();
+        frame.getContentPane().add(
+            new BattlePanel(heroes, enemies, false, () -> showUserMenu())
+        );
+
+        frame.revalidate();
+        frame.repaint();
     }
 
-    // Get heroes
-    List<Hero> heroes = List.of(
-    HeroFactory.createHero("warrior"),
-    HeroFactory.createHero("mage"),
-    HeroFactory.createHero("adventurer")
-);
+    private void startPvP() {
 
-    // Create some enemies for the demo
-    List<Enemy> enemies = List.of(
-        new Enemy("Goblin", 1, 50, 15, 3),
-        new Enemy("Orc", 1, 80, 20, 5)
-    );
+        List<Hero> heroes = List.of(
+            HeroFactory.createHero("warrior"),
+            HeroFactory.createHero("mage"),
+            HeroFactory.createHero("adventurer")
+        );
 
-    // Remove all current UI components and add BattlePanel
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(new BattlePanel(heroes, enemies));
-    frame.revalidate();
-    frame.repaint();
-}
+        frame.getContentPane().removeAll();
+        frame.getContentPane().add(
+            new BattlePanel(heroes, null, true, () -> showUserMenu())
+        );
+
+        frame.revalidate();
+        frame.repaint();
+    }
 }

@@ -1,81 +1,81 @@
 package battle;
 
-import java.util.List;
 import javax.swing.JTextArea;
 import model.Enemy;
 import model.Hero;
 
 public class BattleEngine {
 
-    private void pause() {
-        try {
-            Thread.sleep(800);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    // === HERO attacks ENEMY (PvE) ===
+    public void heroAttack(Hero hero, Enemy enemy, JTextArea log) {
+
+        if (!hero.isAlive()) {
+            log.append(hero.getName() + " is dead and cannot attack.\n");
+            return;
         }
+
+        if (!enemy.isAlive()) {
+            log.append(enemy.getName() + " is already dead.\n");
+            return;
+        }
+
+        // Hero attacks
+        enemy.takeDamage(hero.getAttack());
+        log.append(hero.getName() + " attacks " + enemy.getName() +
+                " (Enemy HP: " + enemy.getHp() + ")\n");
+
+        // Check if enemy died
+        if (!enemy.isAlive()) {
+            log.append(enemy.getName() + " has been defeated!\n");
+            return;
+        }
+
+        // Enemy retaliates
+        hero.takeDamage(enemy.getAttack());
+        log.append(enemy.getName() + " counterattacks " + hero.getName() +
+                " (Hero HP: " + hero.getHp() + ")\n");
+
+        if (!hero.isAlive()) {
+            log.append(hero.getName() + " has been defeated!\n");
+        }
+
+        log.append("\n");
     }
 
-    public void startBattle(List<Hero> heroes, List<Enemy> enemies) {
-        // existing console version
-    }
+    // === HERO vs HERO (PvP) ===
+    public void heroVsHero(Hero attacker, Hero defender, JTextArea log) {
 
-    // NEW METHOD for GUI battles
-    public void runTurn(List<Hero> heroes, List<Enemy> enemies, JTextArea log) {
-
-        for (Hero hero : heroes) {
-            if (!hero.isAlive()) continue;
-            for (Enemy enemy : enemies) {
-                if (enemy.isAlive()) {
-                    enemy.takeDamage(hero.getAttack());
-                    log.append(hero.getName() + " attacks " + enemy.getName() +
-                            " (Enemy HP: " + enemy.getHp() + ")\n");
-                    pause();
-                    break;
-                }
-            }
+        if (!attacker.isAlive()) {
+            log.append(attacker.getName() + " is dead and cannot attack.\n");
+            return;
         }
 
-        for (Enemy enemy : enemies) {
-            if (!enemy.isAlive()) continue;
-            for (Hero hero : heroes) {
-                if (hero.isAlive()) {
-                    hero.takeDamage(enemy.getAttack());
-                    log.append(enemy.getName() + " attacks " + hero.getName() +
-                            " (Hero HP: " + hero.getHp() + ")\n");
-                    pause();
-                    break;
-                }
-            }
+        if (!defender.isAlive()) {
+            log.append(defender.getName() + " is already dead.\n");
+            return;
         }
 
-        log.append("\nHeroes:\n");
-        for (Hero h : heroes) log.append(h.getName() + " HP: " + h.getHp() + "\n");
+        // Attack
+        defender.takeDamage(attacker.getAttack());
+        log.append(attacker.getName() + " attacks " + defender.getName() +
+                " (HP: " + defender.getHp() + ")\n");
 
-        log.append("Enemies:\n");
-        for (Enemy e : enemies) log.append(e.getName() + " HP: " + e.getHp() + "\n");
-
-       boolean anyHeroAlive = false;
-        for (Hero h : heroes) {
-            if (h.isAlive()) {
-              anyHeroAlive = true;
-             break;
-            }
+        if (!defender.isAlive()) {
+            log.append(defender.getName() + " has been defeated!\n");
+            log.append(attacker.getName() + " wins!\n\n");
+            return;
         }
 
-        boolean anyEnemyAlive = false;
-        for (Enemy e : enemies) {
-              if (e.isAlive()) {
-                  anyEnemyAlive = true;
-                  break;
-             }
+        // Counterattack
+        attacker.takeDamage(defender.getAttack());
+        log.append(defender.getName() + " counterattacks " + attacker.getName() +
+                " (HP: " + attacker.getHp() + ")\n");
+
+        if (!attacker.isAlive()) {
+            log.append(attacker.getName() + " has been defeated!\n");
+            log.append(defender.getName() + " wins!\n");
         }
 
-        if (!anyHeroAlive) {
-             log.append("\nEnemies win!\n");
-        } else if (!anyEnemyAlive) {
-             log.append("\nHeroes win!\n");
-        }
-
-        log.append("\n"); // extra spacing
+        log.append("\n");
     }
 }
